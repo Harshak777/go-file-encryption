@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -74,6 +75,59 @@ func Encrypt(source string, password []byte) {
 	fmt.Println("___ENCRYPTION_DONE___")
 }
 
-func Decrypt(file []byte, password []byte) {
+func Decrypt(source string, password []byte) {
+	if _, err := os.Stat(source); os.IsNotExist(err) {
+		panic(err.Error())
+	}
 
+	srcFile, err := os.Open(source)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer srcFile.Close()
+
+	cipherTxt, err := io.ReadAll(srcFile)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	key := password
+	salt := cipherTxt[len(cipherTxt)-12:] // seperating text and nonce
+	str := hex.EncodeToString(salt)
+
+	nonce, err := hex.DecodeString(str)
+
+	dk := pbkdf2.Key(key, nonce, 4096, 32, sha1.New)
+
+	block, err := aes.NewCipher(dk)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	aesgcm, err := cipher.NewGCM(block)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	plainTxt, err := aesgcm.Open(nil, nonce, cipherTxt[:len(cipherTxt)-12], nil)
+
+	dstFile, err := os.Create(source)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer dstFile.Close()
+
+	_, err = dstFile.Write(plainTxt)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	fmt.Println("___DECRYPTION_DONE___")
 }
