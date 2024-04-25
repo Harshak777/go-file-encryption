@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"harshak777/go-file-encrption/filecrypt"
 	"os"
 
 	"golang.org/x/term"
@@ -52,14 +53,34 @@ func encyptHandle() {
 		panic("File not found")
 	}
 
-	_ = getPassword()
+	password := getPassword()
 
 	fmt.Println("___ENCRYPTING___")
 
+	filecrypt.Encrypt(file, password)
+
+	fmt.Println("Encypted the file.")
 }
 
 func decryptHandle() {
+	if len(os.Args) < 3 {
+		fmt.Println("Missing the path to the file. For more info use the help command.")
+		os.Exit(0)
+	}
 
+	file := os.Args[2]
+
+	if !validateFile(file) {
+		panic("File not found")
+	}
+
+	password := getPassword()
+
+	fmt.Println("___DECRYPTING___")
+
+	filecrypt.Decrypt(file, password)
+
+	fmt.Println("Decypted the file.")
 }
 
 func getPassword() []byte {
