@@ -20,12 +20,12 @@ func main() {
 	switch function {
 	case "help":
 		printHelp()
-	case "encypt":
+	case "encrypt":
 		encyptHandle()
 	case "decrypt":
 		decryptHandle()
 	default:
-		fmt.Println("Use encrypt keyword to encypt the file, decrypt keyword to decypt the file.")
+		fmt.Println("Use encrypt keyword to encrypt the file, decrypt keyword to decypt the file.")
 		os.Exit(1)
 	}
 }
@@ -84,13 +84,13 @@ func decryptHandle() {
 }
 
 func getPassword() []byte {
-	fmt.Println("Enter the password.")
+	fmt.Printf("Enter the password. \n")
 	password, _ := term.ReadPassword(0)
 
-	fmt.Println("Confirm the password.")
+	fmt.Printf("Confirm the password. \n")
 	confirmPassword, _ := term.ReadPassword(0)
 
-	if validatePassword(password, confirmPassword) {
+	if !validatePassword(password, confirmPassword) {
 		fmt.Println("Passwords didn't match")
 		getPassword()
 	}
@@ -99,10 +99,7 @@ func getPassword() []byte {
 }
 
 func validatePassword(password []byte, confirmPassword []byte) bool {
-	if !bytes.Equal(password, confirmPassword) {
-		return false
-	}
-	return true
+	return bytes.Equal(password, confirmPassword)
 }
 
 func validateFile(file string) bool {
